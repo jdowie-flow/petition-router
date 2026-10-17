@@ -1,0 +1,37 @@
+[project]
+name = "petition-router"
+version = "0.1.0"
+description = "Scores language models on routing UK Parliament petitions to government departments."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "litellm>=1.100",
+    "numpy>=2.0",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+    "scikit-learn>=1.5",
+    "uvicorn>=0.30",
+]
+
+[project.scripts]
+petition-router = "petition_router.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]

@@ -1,0 +1,18 @@
+name: Checks
+
+on: [push, pull_request]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      UV_LOCKED: 1 # fail if uv.lock is out of date
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: make lint
+      - run: make test
+      - run: npm --prefix web run build

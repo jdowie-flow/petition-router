@@ -1,0 +1,406 @@
+{
+ "agreed": "2026-10-14T19:42:03+00:00",
+ "finished": "2026-10-14T20:14:49+00:00",
+ "labels": {
+  "700005": {
+   "department": "HO",
+   "seconds": 2.586
+  },
+  "700013": {
+   "department": "DBIST",
+   "seconds": 2.204
+  },
+  "700024": {
+   "department": "DBIST",
+   "seconds": 2.304
+  },
+  "700035": {
+   "department": "CO",
+   "seconds": 5.785
+  },
+  "700047": {
+   "department": "DfE",
+   "seconds": 3.183
+  },
+  "700138": {
+   "department": "HMT",
+   "seconds": 1.972
+  },
+  "700273": {
+   "department": "DEFRA",
+   "seconds": 2.041
+  },
+  "700292": {
+   "department": "DHSC",
+   "seconds": 4.64
+  },
+  "700404": {
+   "department": "DBIST",
+   "seconds": 1.985
+  },
+  "700482": {
+   "department": "DBIST",
+   "seconds": 4.27
+  },
+  "700682": {
+   "department": "HO",
+   "seconds": 1.796
+  },
+  "700765": {
+   "department": "HMT",
+   "seconds": 3.79
+  },
+  "701064": {
+   "department": "CO",
+   "seconds": 2.52
+  },
+  "701137": {
+   "department": "DHSC",
+   "seconds": 3.223
+  },
+  "701159": {
+   "department": "DHSC",
+   "seconds": 3.486
+  },
+  "701540": {
+   "department": "HO",
+   "seconds": 3.155
+  },
+  "701850": {
+   "department": "CO",
+   "seconds": 3.992
+  },
+  "702270": {
+   "department": "DfE",
+   "seconds": 9.505
+  },
+  "702760": {
+   "department": "DfT",
+   "seconds": 4.853
+  },
+  "702844": {
+   "department": "HMT",
+   "seconds": 2.171
+  },
+  "703861": {
+   "department": "CO",
+   "seconds": 3.119
+  },
+  "705154": {
+   "department": "CO",
+   "seconds": 3.572
+  },
+  "705601": {
+   "department": "CO",
+   "seconds": 3.373
+  },
+  "705772": {
+   "department": "CO",
+   "seconds": 5.856
+  },
+  "706302": {
+   "department": "DEFRA",
+   "seconds": 3.303
+  },
+  "707685": {
+   "department": "DfE",
+   "seconds": 1.911
+  },
+  "708358": {
+   "department": "DfE",
+   "seconds": 3.417
+  },
+  "709054": {
+   "department": "DEFRA",
+   "seconds": 4.354
+  },
+  "710017": {
+   "department": "HMT",
+   "seconds": 2.505
+  },
+  "710486": {
+   "department": "DEFRA",
+   "seconds": 6.205
+  },
+  "711355": {
+   "department": "HO",
+   "seconds": 4.857
+  },
+  "712763": {
+   "department": "DfT",
+   "seconds": 3.451
+  },
+  "714927": {
+   "department": "DfT",
+   "seconds": 3.59
+  },
+  "715292": {
+   "department": "DWP",
+   "seconds": 5.439
+  },
+  "715511": {
+   "department": "CO",
+   "seconds": 6.237
+  },
+  "717817": {
+   "department": "HO",
+   "seconds": 2.719
+  },
+  "719124": {
+   "department": "MoD",
+   "seconds": 5.108
+  },
+  "721825": {
+   "department": "DBIST",
+   "seconds": 6.417
+  },
+  "724432": {
+   "department": "DfE",
+   "seconds": 2.238
+  },
+  "725909": {
+   "department": "DHSC",
+   "seconds": 3.443
+  },
+  "728715": {
+   "department": "MoJ",
+   "seconds": 7.45
+  },
+  "728751": {
+   "department": "DHSC",
+   "seconds": 2.652
+  },
+  "729027": {
+   "department": "HO",
+   "seconds": 1.962
+  },
+  "729212": {
+   "department": "HO",
+   "seconds": 3.408
+  },
+  "729235": {
+   "department": "HMT",
+   "seconds": 5.785
+  },
+  "729478": {
+   "department": "DfT",
+   "seconds": 25.672
+  },
+  "729708": {
+   "department": "DEFRA",
+   "seconds": 7.14
+  },
+  "730292": {
+   "department": "DEFRA",
+   "seconds": 9.156
+  },
+  "731497": {
+   "department": "DfE",
+   "seconds": 3.947
+  },
+  "731574": {
+   "department": "DHSC",
+   "seconds": 4.019
+  },
+  "732342": {
+   "department": "DHSC",
+   "seconds": 2.555
+  },
+  "732869": {
+   "department": "MoD",
+   "seconds": 17.403
+  },
+  "733380": {
+   "department": "DHSC",
+   "seconds": 5.842
+  },
+  "733797": {
+   "department": "HMT",
+   "seconds": 2.037
+  },
+  "734090": {
+   "department": "HMT",
+   "seconds": 2.39
+  },
+  "734243": {
+   "department": "DHSC",
+   "seconds": 4.694
+  },
+  "734311": {
+   "department": "CO",
+   "seconds": 7.412
+  },
+  "734441": {
+   "department": "DBIST",
+   "seconds": 2.542
+  },
+  "735949": {
+   "department": "DHSC",
+   "seconds": 2.06
+  },
+  "736164": {
+   "department": "DHSC",
+   "seconds": 2.47
+  },
+  "737608": {
+   "department": "DfT",
+   "seconds": 3.405
+  },
+  "738192": {
+   "department": "DEFRA",
+   "seconds": 6.993
+  },
+  "738421": {
+   "department": "CO",
+   "seconds": 4.173
+  },
+  "738484": {
+   "department": "DfE",
+   "seconds": 1.84
+  },
+  "741677": {
+   "department": "CO",
+   "seconds": 12.558
+  },
+  "744237": {
+   "department": "CO",
+   "seconds": 28.553
+  },
+  "744397": {
+   "department": "CO",
+   "seconds": 8.635
+  },
+  "745717": {
+   "department": "CO",
+   "seconds": 3.341
+  },
+  "746363": {
+   "department": "HO",
+   "seconds": 5.172
+  },
+  "747448": {
+   "department": "DfE",
+   "seconds": 6.14
+  },
+  "750612": {
+   "department": "CO",
+   "seconds": 6.407
+  },
+  "752501": {
+   "department": "DHSC",
+   "seconds": 34.636
+  },
+  "754152": {
+   "department": "HMT",
+   "seconds": 7.09
+  },
+  "755446": {
+   "department": "DfE",
+   "seconds": 2.377
+  },
+  "756494": {
+   "department": "MHCLG",
+   "seconds": 5.525
+  },
+  "756775": {
+   "department": "HO",
+   "seconds": 1.755
+  },
+  "756814": {
+   "department": "DfT",
+   "seconds": 2.589
+  },
+  "758008": {
+   "department": "DEFRA",
+   "seconds": 9.088
+  },
+  "758497": {
+   "department": "DWP",
+   "seconds": 7.725
+  },
+  "759478": {
+   "department": "DHSC",
+   "seconds": 2.927
+  },
+  "760061": {
+   "department": "DCMS",
+   "seconds": 2.873
+  },
+  "760199": {
+   "department": "CO",
+   "seconds": 3.655
+  },
+  "760485": {
+   "department": "CO",
+   "seconds": 5.672
+  },
+  "761287": {
+   "department": "CO",
+   "seconds": 2.111
+  },
+  "761984": {
+   "department": "HO",
+   "seconds": 1.872
+  },
+  "762177": {
+   "department": "MoJ",
+   "seconds": 14.655
+  },
+  "762304": {
+   "department": "MHCLG",
+   "seconds": 5.705
+  },
+  "762640": {
+   "department": "CO",
+   "seconds": 7.372
+  },
+  "763721": {
+   "department": "DEFRA",
+   "seconds": 16.417
+  },
+  "764268": {
+   "department": "DfE",
+   "seconds": 2.323
+  },
+  "764375": {
+   "department": "CO",
+   "seconds": 7.186
+  },
+  "764510": {
+   "department": "DHSC",
+   "seconds": 3.936
+  },
+  "765199": {
+   "department": "DBIST",
+   "seconds": 3.242
+  },
+  "765360": {
+   "department": "DHSC",
+   "seconds": 2.653
+  },
+  "765849": {
+   "department": "DBIST",
+   "seconds": 10.845
+  },
+  "766919": {
+   "department": "CO",
+   "seconds": 13.573
+  },
+  "768687": {
+   "department": "DHSC",
+   "seconds": 3.205
+  },
+  "775393": {
+   "department": "DHSC",
+   "seconds": 4.289
+  },
+  "776949": {
+   "department": "DBIST",
+   "seconds": 3.059
+  },
+  "777325": {
+   "department": "DHSC",
+   "seconds": 2.566
+  }
+ }
+}
