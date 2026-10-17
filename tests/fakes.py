@@ -19,8 +19,10 @@ WORDS = {
 }
 
 
-def petition(i: int, title: str, *departments: str, response: str = "") -> Petition:
-    return Petition(i, title, "", "", "2025-06-01", response or f"response-{i}", list(departments))
+def petition(
+    i: int, title: str, *departments: str, response: str = "", responded: str = "2025-06-01"
+) -> Petition:
+    return Petition(i, title, "", "", responded, response or f"response-{i}", list(departments))
 
 
 def make_petitions(per_department: int = 30, first_id: int = 1) -> list[Petition]:

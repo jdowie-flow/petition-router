@@ -18,6 +18,15 @@ from .routers import Answer
 RUNS = Path("results/runs")
 LABELS = Path("results/my-labels.json")
 
+# The last month of each model's training data, as Anthropic publishes it:
+# https://support.claude.com/en/articles/8114494-how-up-to-date-is-claudes-training-data
+# A model may have seen responses published up to the end of that month. To check another
+# model for remembered answers, add its name, the part after any "/", and its cutoff.
+TRAINING_CUTOFFS = {
+    "claude-haiku-5-5": "2026-06",
+    "claude-sonnet-5-5": "2026-06",
+}
+
 
 def start_run(router: str, reverse: bool, version: str | None) -> Path:
     """A new run file: a line describing the run, then a line per answer as it arrives."""
@@ -105,6 +114,28 @@ def bootstrap(values, groups=None) -> list[float]:
     return [round(float(x), 4) for x in (values.mean(), low, high)]
 
 
+def gap(values, groups, before) -> list[float]:
+    """The mean of the values marked `before`, minus the mean of the rest, with a 95% interval.
+
+    Resampled like `bootstrap`, so values in the same group stay together, even a group
+    with some values before and some after.
+    """
+    values = np.asarray(values, dtype=float)
+    before = np.asarray(before, dtype=bool)
+    group = np.unique(groups, return_inverse=True)[1]
+    count = group.max() + 1
+    picks = np.random.default_rng(0).integers(0, count, (2000, count))
+    means = []
+    for side in (before, ~before):
+        sums = np.bincount(group, weights=values * side, minlength=count)
+        sizes = np.bincount(group, weights=side.astype(float), minlength=count)
+        with np.errstate(divide="ignore", invalid="ignore"):  # a resample can miss a side
+            means.append(sums[picks].sum(axis=1) / sizes[picks].sum(axis=1))
+    low, high = np.nanpercentile(means[0] - means[1], [2.5, 97.5])
+    estimate = values[before].mean() - values[~before].mean()
+    return [round(float(x), 4) for x in (estimate, low, high)]
+
+
 def latest(runs: list[dict], petitions: list[Petition]) -> tuple[dict, dict]:
     """Complete runs by (router, reversed), oldest first, and each router's newest one."""
     history = defaultdict(list)
@@ -151,6 +182,9 @@ def summarise(petitions: list[Petition], departments: dict, runs: list[dict], la
         "me": compare_with_me(labels, gold, answers, right, response),
         "consistency": checks,
         "by_department": by_department(petitions, right),
+        "training_cutoffs": training_cutoffs(
+            petitions, [row["name"] for row in routers], right, response
+        ),
         "mixups": mixups(best_model, answers, right, petitions, labels.departments)
         if best_model
         else None,
@@ -209,10 +243,6 @@ def score(name: str, answers: dict, right: dict, petitions: list[Petition], resp
     hits = right[name]
     costs = [a["cost"] for a in answers.values()]
     times = [a["seconds"] for a in answers.values() if a["seconds"] is not None]
-    years = defaultdict(list)
-    for p in petitions:
-        if p.id in hits:
-            years[p.responded[:4]].append(hits[p.id])
     row = {
         "name": name,
         "petitions": len(hits),
@@ -220,7 +250,6 @@ def score(name: str, answers: dict, right: dict, petitions: list[Petition], resp
         "unusable": sum(a["department"] is None for a in answers.values()),
         "cost_per_1000": None if None in costs else round(1000 * mean(costs), 4),
         "median_seconds": median(times) if times else None,
-        "by_year": {year: [len(h), round(mean(h), 4)] for year, h in sorted(years.items())},
     }
     shared = [i for i in hits if i in right.get("tfidf", {})]
     if name != "tfidf" and shared:
@@ -311,6 +340,56 @@ def consistency(name: str, forward: list, backward: list, gold: dict, hits: dict
         if len(stable) < len(shared)
         else None,
     }
+
+
+def training_cutoffs(petitions: list[Petition], names: list[str], right: dict, response: dict):
+    """Each model's accuracy on petitions answered before and after its training cutoff.
+
+    A model may have seen the responses published before its cutoff, so if it's remembering
+    answers, it does better on those. Word matching can't have seen any of them, so it shows
+    how much of a difference comes from the petitions themselves.
+    """
+    models, unknown = defaultdict(list), []  # models by cutoff, and those with none known
+    for name in names:
+        cutoff = TRAINING_CUTOFFS.get(name.split("/")[-1])
+        if cutoff:
+            models[cutoff].append(name)
+        elif name != "tfidf":
+            unknown.append(name)
+
+    groups = []
+    for cutoff, named in sorted(models.items()):
+        before = {p.id: p.responded[:7] <= cutoff for p in petitions}
+        groups.append(
+            {
+                "cutoff": cutoff,
+                "before": sum(before.values()),
+                "after": len(before) - sum(before.values()),
+                "routers": [
+                    before_and_after(name, before, right, response)
+                    for name in [*named, "tfidf"]
+                    if name in right
+                ],
+            }
+        )
+    return {"groups": groups, "unknown": unknown}
+
+
+def before_and_after(name: str, before: dict, right: dict, response: dict) -> dict:
+    hits, baseline = right[name], right.get("tfidf")
+    row = {"name": name}
+    for side, wanted in (("before", True), ("after", False)):
+        ids = [i for i in hits if i in before and before[i] == wanted]
+        row[side] = bootstrap([hits[i] for i in ids], [response[i] for i in ids]) if ids else None
+    if name != "tfidf" and baseline and row["before"] and row["after"]:
+        # How much further ahead of word matching the model is before its cutoff than after
+        shared = [i for i in hits if i in baseline and i in before]
+        row["extra_lead"] = gap(
+            [hits[i] - baseline[i] for i in shared],
+            [response[i] for i in shared],
+            [before[i] for i in shared],
+        )
+    return row
 
 
 def by_department(petitions: list[Petition], right: dict) -> list[dict]:

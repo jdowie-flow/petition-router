@@ -1,9 +1,19 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { answers } from "./answers";
 import { getResults, ServerError, type Estimate, type Summary } from "./api";
 import { Acronym } from "./Acronym";
-import { difference, dollars, duration, interval, percent, routerName } from "./format";
+import {
+  difference,
+  dollars,
+  duration,
+  interval,
+  list,
+  month,
+  percent,
+  routerName,
+} from "./format";
 import { markdown } from "./markdown";
+import { remembering } from "./remembering";
 
 export function Results() {
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -36,7 +46,7 @@ export function Results() {
     );
   }
 
-  const { routers, me, consistency, mixups } = summary;
+  const { routers, me, consistency, mixups, training_cutoffs } = summary;
   const best = routers.find((router) => router.name !== "tfidf");
 
   return (
@@ -211,16 +221,19 @@ export function Results() {
 
           {mixups && mixups.pairs.length > 0 && <Mistakes summary={summary} />}
 
-          <section>
-            <h2>Could the models be remembering the answers?</h2>
-            <p>
-              A response and its department tag are public from the day the response is published,
-              so a model may have seen the ones from before its training cutoff. Word matching
-              cannot have seen any of them. If a model does much better than word matching on years
-              before its cutoff and not after, it may be remembering answers.
-            </p>
-            <ByYear summary={summary} />
-          </section>
+          {(training_cutoffs.groups.length > 0 || training_cutoffs.unknown.length > 0) && (
+            <section>
+              <h2>Could the models be remembering the answers?</h2>
+              <p>
+                A response and its department tag are public from the day the response is published,
+                so a model may have seen the ones published before its training cutoff, but not the
+                ones after. If a model is remembering answers, it does better on petitions answered
+                before its cutoff. Word matching cannot have seen any of them, so it shows how much
+                of a difference comes from the petitions themselves.
+              </p>
+              <Remembering summary={summary} />
+            </section>
+          )}
 
           <section>
             <h2>Which departments are hardest to get right?</h2>
@@ -439,39 +452,75 @@ function ScaleHeading({ start }: { start: number }) {
   );
 }
 
-function ByYear({ summary }: { summary: Summary }) {
-  const years = [...new Set(summary.routers.flatMap((r) => Object.keys(r.by_year)))].sort();
+/**
+ * Each model's accuracy on the petitions answered before and after its training cutoff, with
+ * word matching on the same petitions as a yardstick.
+ */
+function Remembering({ summary }: { summary: Summary }) {
+  const { groups, unknown } = summary.training_cutoffs;
+  const conclusion = remembering(summary);
+  const missing =
+    unknown.length > 0 &&
+    `${list(unknown.map(routerName))} ${unknown.length === 1 ? "is" : "are"} left out, because ` +
+      `${unknown.length === 1 ? "its training cutoff isn't" : "their training cutoffs aren't"} known.`;
+  if (groups.length === 0) return <p>{missing}</p>;
+
   return (
-    <Scroll label="By the year of the government's response">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Routed by</th>
-            {years.map((year) => (
-              <th key={year} scope="col" className="number">
-                {year}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {summary.routers.map((router) => (
-            <tr key={router.name}>
-              <th scope="row">{routerName(router.name)}</th>
-              {years.map((year) => {
-                const cell = router.by_year[year];
-                return (
-                  <td key={year} className="number">
-                    {cell && percent(cell[1])}
-                    {cell && <span className="range">{cell[0]} petitions</span>}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Scroll>
+    <>
+      {groups.map((group) => {
+        const when = month(group.cutoff);
+        const models = group.routers.filter((router) => router.name !== "tfidf");
+        const compared = group.before > 0 && group.after > 0;
+        return (
+          <Fragment key={group.cutoff}>
+            <p>
+              {list(models.map((router) => routerName(router.name)))}{" "}
+              {models.length === 1 ? "was" : "were"} trained on data up to the end of {when}.{" "}
+              {compared
+                ? `${group.before} petitions were answered by then, and ${group.after} after.`
+                : `All ${group.before + group.after} petitions were answered ${group.after ? "after" : "by"} then, so there is nothing to compare yet.`}
+            </p>
+            {compared && (
+              <Scroll label={`Before and after the end of ${when}`}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Routed by</th>
+                      <th scope="col">Answered by the end of {when}</th>
+                      <th scope="col">Answered after {when}</th>
+                      <th scope="col">Extra lead before the cutoff</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.routers.map((router) => (
+                      <tr
+                        key={router.name}
+                        data-kind={router.name === "tfidf" ? "baseline" : "model"}
+                      >
+                        <th scope="row" title={router.name}>
+                          {routerName(router.name)}
+                        </th>
+                        {router.before ? <Share estimate={router.before} /> : <td />}
+                        {router.after ? <Share estimate={router.after} /> : <td />}
+                        <Difference estimate={router.extra_lead} />
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Scroll>
+            )}
+          </Fragment>
+        );
+      })}
+      {conclusion && <p className="conclusion">{conclusion}</p>}
+      <p className="note">
+        Extra lead before the cutoff is how much further ahead of word matching a model is on the
+        petitions answered before its cutoff than on the ones answered after. If its range includes
+        0, the difference could be down to chance. The fewer petitions there are after the cutoff,
+        the wider the ranges, and the bigger a difference has to be to show. Each cutoff is the one
+        the model's maker publishes.{missing && ` ${missing}`}
+      </p>
+    </>
   );
 }
 

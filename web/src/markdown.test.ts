@@ -17,7 +17,6 @@ const summary: Summary = {
       unusable: 2,
       cost_per_1000: 0.07,
       median_seconds: 1.9,
-      by_year: {},
     },
     {
       name: "tfidf",
@@ -26,7 +25,6 @@ const summary: Summary = {
       unusable: 0,
       cost_per_1000: 0,
       median_seconds: 0.0004,
-      by_year: {},
     },
   ],
   me: {
@@ -45,6 +43,7 @@ const summary: Summary = {
   },
   consistency: [],
   by_department: [],
+  training_cutoffs: { groups: [], unknown: [] },
   mixups: null,
 };
 

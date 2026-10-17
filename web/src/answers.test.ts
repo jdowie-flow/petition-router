@@ -9,7 +9,6 @@ const router = (name: string, accuracy: Router["accuracy"], extra = {}): Router 
   unusable: 0,
   cost_per_1000: 0,
   median_seconds: 1.9,
-  by_year: {},
   ...extra,
 });
 
@@ -37,6 +36,7 @@ const summary: Summary = {
   },
   consistency: [],
   by_department: [],
+  training_cutoffs: { groups: [], unknown: [] },
   mixups: null,
 };
 

@@ -26,7 +26,21 @@ export interface Router {
   unusable: number;
   cost_per_1000: number | null;
   median_seconds: number | null;
-  by_year: Record<string, [number, number]>; // year of the response -> [petitions, accuracy]
+}
+
+/** A router's accuracy on the petitions answered before and after a training cutoff. */
+export interface CutoffRouter {
+  name: string;
+  before: Estimate | null;
+  after: Estimate | null;
+  extra_lead?: Estimate; // how much further ahead of word matching it is before than after
+}
+
+export interface CutoffGroup {
+  cutoff: string; // the last month of the training data, such as "2026-06"
+  before: number; // petitions answered by the end of that month
+  after: number;
+  routers: CutoffRouter[]; // the models with this cutoff, then word matching
 }
 
 export interface Mistake {
@@ -71,6 +85,10 @@ export interface Summary {
     right_otherwise: number | null;
   }[];
   by_department: { department: string; petitions: number; accuracy: Record<string, number> }[];
+  training_cutoffs: {
+    groups: CutoffGroup[];
+    unknown: string[]; // models whose training cutoff isn't known
+  };
   mixups: {
     router: string;
     pairs: { tagged: string; chose: string | null; petitions: Mistake[] }[];

@@ -4,7 +4,7 @@ import io
 import numpy as np
 from fakes import petition
 
-from petition_router.results import Labels, bootstrap, spreadsheet, summarise
+from petition_router.results import Labels, bootstrap, gap, spreadsheet, summarise
 
 NO_LABELS = Labels()
 
@@ -44,6 +44,49 @@ def test_grouped_values_are_resampled_together():
     _, low, high = bootstrap(values)
     _, grouped_low, grouped_high = bootstrap(values, groups)
     assert grouped_high - grouped_low > high - low
+
+
+def test_gap_between_before_and_after():
+    values = [1] * 15 + [0] * 5 + [1] * 5 + [0] * 15  # 75% before, 25% after
+    before = [True] * 20 + [False] * 20
+    estimate, low, high = gap(values, list(range(40)), before)
+    assert estimate == 0.5
+    assert 0.1 < low < estimate < high < 0.9
+    _, grouped_low, grouped_high = gap(values, [i // 5 for i in range(40)], before)
+    assert grouped_high - grouped_low > high - low
+
+
+def test_accuracy_before_and_after_each_models_training_cutoff():
+    petitions = [
+        petition(i, "Police", "HO", responded="2026-06-30" if i <= 20 else "2026-07-01")
+        for i in range(1, 41)
+    ]
+    runs = [
+        run("tfidf", {i: "HO" if i % 2 else "DfE" for i in range(1, 41)}),  # half right throughout
+        run("anthropic/claude-haiku-5-5", {i: "HO" if i <= 20 else "DfE" for i in range(1, 41)}),
+        run("test/model", dict.fromkeys(range(1, 41), "HO")),
+    ]
+    split = summarise(petitions, {}, runs, NO_LABELS)["training_cutoffs"]
+    assert split["unknown"] == ["test/model"]  # no cutoff is known for it
+    (group,) = split["groups"]
+    assert (group["cutoff"], group["before"], group["after"]) == ("2026-06", 20, 20)
+    haiku, baseline = group["routers"]
+    assert (haiku["name"], baseline["name"]) == ("anthropic/claude-haiku-5-5", "tfidf")
+    assert (haiku["before"][0], haiku["after"][0]) == (1, 0)
+    assert baseline["before"][0] == baseline["after"][0] == 0.5
+    estimate, low, _ = haiku["extra_lead"]  # right only before its cutoff, so it may remember
+    assert estimate == 1 and low > 0
+    assert "extra_lead" not in baseline
+
+
+def test_no_split_when_every_petition_is_from_before_the_cutoff():
+    petitions = [petition(i, "Police", "HO") for i in range(1, 5)]
+    runs = [run("tfidf", dict.fromkeys(range(1, 5), "HO"))]
+    runs.append(run("anthropic/claude-sonnet-5-5", dict.fromkeys(range(1, 5), "HO")))
+    (group,) = summarise(petitions, {}, runs, NO_LABELS)["training_cutoffs"]["groups"]
+    assert (group["before"], group["after"]) == (4, 0)
+    assert group["routers"][0]["after"] is None
+    assert "extra_lead" not in group["routers"][0]
 
 
 def test_any_tagged_department_counts():
